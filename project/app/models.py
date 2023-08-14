@@ -1,6 +1,8 @@
 from sqlmodel import SQLModel, Field, BigInteger, Column, Relationship
 from typing import Optional
 import logging
+from sqlalchemy.exc import DBAPIError
+from app.exceptions import DatabaseError
 
 logger = logging.getLogger(__name__)
 
@@ -27,9 +29,14 @@ class YoutubeMetadata(SQLModel, table=True):
         Raises:
             DatabaseError: If an error occurs while saving to the database.
         """
-        session.add(self)
-        await session.commit()
-        await session.refresh(self)
+        try:
+            session.add(self)
+            await session.commit()
+            await session.refresh(self)
+        except DBAPIError as e:
+            raise DatabaseError(
+                f"An error occurred while saving to the database: {str(e)}"
+            )
 
 
 class ShazamMetadata(SQLModel, table=True):
@@ -57,6 +64,11 @@ class ShazamMetadata(SQLModel, table=True):
         Raises:
             DatabaseError: If an error occurs while saving to the database.
         """
-        session.add(self)
-        await session.commit()
-        await session.refresh(self)
+        try:
+            session.add(self)
+            await session.commit()
+            await session.refresh(self)
+        except DBAPIError as e:
+            raise DatabaseError(
+                f"An error occurred while saving to the database: {str(e)}"
+            )
