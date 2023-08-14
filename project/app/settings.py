@@ -2,7 +2,7 @@ import os
 
 
 class Settings:
-    DOWNLOAD_PATH = os.getenv("DOWNLOAD_PATH")
+    DATABASE_URL = os.environ.get("DATABASE_URL")
 
 
 settings = Settings()

@@ -1,4 +1,5 @@
 from shazamio import Shazam
+from pydub import AudioSegment
 from typing import Dict
 from app.exceptions import RecognizeError, DataTransformationError
 
@@ -8,16 +9,16 @@ class ShazamAudioRecognizer:
     A class to perform audio recognition using the Shazam service.
     """
 
-    def __init__(self, audio_path: str) -> None:
+    def __init__(self, audio_segment: AudioSegment) -> None:
         """
         Initialize the ShazamAudioRecognizer instance.
 
         Args:
-            audio_path (str): Path to the audio file for recognition.
+            audio_segment (AudioSegment): Path to the audio file for recognition.
         """
-        self.audio_path = audio_path
+        self.audio_segment = audio_segment
 
-    async def recognise_audio(self) -> Dict:
+    async def recognize_audio(self) -> Dict:
         """
         Recognize the audio and retrieve Shazam metadata for the recognized song.
 
@@ -28,7 +29,7 @@ class ShazamAudioRecognizer:
         """
         try:
             shazam = Shazam()
-            song = await shazam.recognize_song(self.audio_path)
+            song = await shazam.recognize_song(self.audio_segment)
             if not song:
                 raise RecognizeError("No song recognized from audio.")
             return song

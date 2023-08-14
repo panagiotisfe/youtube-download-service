@@ -1,2 +1,4 @@
 .dockerignore
 Dockerfile
+poetry.lock
+pyproject.toml

@@ -2,6 +2,7 @@ from pytube import YouTube
 from pydub import AudioSegment
 from pytube.exceptions import PytubeError
 from typing import Dict
+from io import BytesIO
 import logging
 from app.exceptions import DownloadError, YoutubeAudioNotFound, DataTransformationError
 
@@ -13,21 +14,24 @@ class YoutubeAudioDownloader:
     A class to download and process audio from a YouTube video.
     """
 
-    def __init__(self, youtube_object: YouTube, audio_dir: str) -> None:
+    def __init__(self, youtube_object: YouTube, buffer: BytesIO) -> None:
         """
-        Initialize the YoutubeAudioDownloader instance.
+        Initialize an instance of the AudioDownloader class.
 
         Args:
-            youtube_object (YouTube): YouTube object containing video details.
-            audio_dir (str): Directory where audio will be saved.
+            youtube_object (YouTube): A YouTube object representing the video.
+            buffer (BytesIO): A BytesIO buffer to store the downloaded audio.
+            audio_segment: Initially set to None.
+            It will hold the audio data segment once downloaded.
         """
         self.youtube_object = youtube_object
-        self.audio_dir = audio_dir
-        self.file_path = None
+        self.buffer = buffer
+        self.audio_segment = None
 
     def download_audio(self) -> None:
         """
-        Download audio from the YouTube video and save it to the specified directory.
+        Download the audio from a YouTube video using the
+        provided YouTube object and saves it to the buffer.
 
         Raises:
             DownloadError: If an error occurs during audio download.
@@ -37,28 +41,29 @@ class YoutubeAudioDownloader:
             stream = self.youtube_object.streams.get_audio_only()
             if not stream:
                 raise YoutubeAudioNotFound
-            self.file_path = stream.download(self.audio_dir)
+            stream.stream_to_buffer(self.buffer)
         except PytubeError as e:
             raise DownloadError(f"An error occurred during audio download. {str(e)}")
 
-    def trim_audio_track(self) -> None:
+    def convert_to_audio_segment(self) -> AudioSegment:
         """
-        Trim the downloaded audio to the first 20 seconds.
+        Convert the downloaded audio into an AudioSegment
+        trimming it to the first 20 seconds.
 
-        Note:
-            In case of an error during trimming
-            the original downloaded audio remains unchanged.
+        Returns:
+            AudioSegment: An AudioSegment object containing the trimmed audio.
+
+        Raises:
+            Exception: If an error occurs during the conversion or trimming.
         """
         try:
-            audio = AudioSegment.from_file(self.file_path, "mp4")
-            audio = audio.get_sample_slice(
-                start_sample=0, end_sample=(20 * audio.frame_rate)
+            self.buffer.seek(0)
+            self.audio_segment = AudioSegment.from_file(self.buffer, "mp4")
+            self.audio_segment = self.audio_segment.get_sample_slice(
+                start_sample=0, end_sample=(20 * self.audio_segment.frame_rate)
             )
-            audio.export(self.file_path, format="mp4")
-        except Exception:
-            # In this case, if an error occurs during trimming
-            # the original downloaded audio will still be available
-            pass
+        except Exception as e:
+            logger.error(e)
 
 
 class YoutubeMetadataTransformer:
