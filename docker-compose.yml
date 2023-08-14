@@ -4,21 +4,36 @@ services:
 
   web:
     build: ./project
-    command: uvicorn app.main:app --reload --workers 1 --host 0.0.0.0 --port 8000
+    command: ./entrypoint.sh
     volumes:
       - ./project:/usr/src/app
     ports:
       - 8004:8000
     environment:
       - DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/foo
+      - DOWNLOAD_PATH=app/downloads
     depends_on:
       - db
+    networks:
+      - app_net
 
   db:
     image: postgres:15.3
-    expose:
-      - 5432
+    ports:
+      - 5432:5432
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=foo
+    volumes:
+      - postgresql_data:/data
+    networks:
+      - app_net
+
+networks:
+  app_net:
+    driver: bridge
+
+volumes:
+  postgresql_data:
+    name: app-postgresql-data
