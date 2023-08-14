@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "youtube-download-service"
+version = "0.1.0"
+description = ""
+authors = ["sfendourakis <panagiotis.sfendourakis@saphetor.com>"]
+readme = "README.md"
+packages = [{include = "youtube_download_service"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+alembic = "1.11.1"
+asyncpg = "0.28.0"
+fastapi = "0.100.0"
+sqlmodel = "0.0.8"
+uvicorn = "0.22.0"
+pytube = {git = "https://github.com/sfendourakis/pytube.git", rev = "86b38e6e6da2285c09fc7b0fb9ccee8fa488d209"}
+shazamio = "0.4.0.1"
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^3.3.3"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

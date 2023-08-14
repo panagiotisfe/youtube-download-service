@@ -20,4 +20,3 @@ $ curl -d '{"name":"Test name", "artist":"Test Artist", "year":"2023"}' -H "Cont
 ```
 
 Get all songs: [http://localhost:8004/songs](http://localhost:8004/songs)
-
