@@ -60,6 +60,7 @@ def download_youtube_audio(youtube_object) -> AudioSegment:
     youtube_audio = YoutubeAudioDownloader(youtube_object, buffer)
     youtube_audio.download_audio()
     youtube_audio.convert_to_audio_segment()
+    buffer.close()
     return youtube_audio.audio_segment
 
 
@@ -68,7 +69,7 @@ async def recognize_audio(audio_segment) -> Union[Dict, None]:
     Recognize audio using Shazam.
 
     Args:
-        audio_segment: Path to the audio file for recognition.
+        audio_segment: AudioSegment of the audio for recognition.
 
     Returns:
         Union[Dict, None]:
