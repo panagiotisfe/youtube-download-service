@@ -1,6 +1,7 @@
-from sqlmodel import SQLModel, Field, BigInteger, Column, Relationship
-from typing import Optional
 import logging
+from typing import Optional
+from sqlmodel import SQLModel, Field, BigInteger, Column, Relationship
+from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlalchemy.exc import DBAPIError
 from app.exceptions import DatabaseError
 
@@ -19,12 +20,12 @@ class YoutubeMetadata(SQLModel, table=True):
     views: int = Field(default=None, sa_column=Column(BigInteger()))
     shazam_metadata: "ShazamMetadata" = Relationship(back_populates="youtube_metadata")
 
-    async def save(self, session):
+    async def save(self, session: AsyncSession):
         """
         Save the YoutubeMetadata instance to the database.
 
         Args:
-            session: The database session to use.
+            session (AsyncSession): The database session to use.
 
         Raises:
             DatabaseError: If an error occurs while saving to the database.
@@ -45,21 +46,24 @@ class ShazamMetadata(SQLModel, table=True):
     """
 
     __tablename__ = "shazam_metadata"
-    id: int = Field(default=None, nullable=False, primary_key=True)
+    youtube_id: str = Field(
+        default=None,
+        nullable=False,
+        foreign_key="youtube_metadata.id",
+        primary_key=True,
+    )
     title: str
     genre: str
     lyrics: Optional[str]
-    youtube_id: str = Field(
-        default=None, nullable=False, foreign_key="youtube_metadata.id", unique=True
-    )
+
     youtube_metadata: YoutubeMetadata = Relationship(back_populates="shazam_metadata")
 
-    async def save(self, session):
+    async def save(self, session: AsyncSession):
         """
         Save the ShazamMetadata instance to the database.
 
         Args:
-            session: The database session to use.
+            session (AsyncSession): The database session to use.
 
         Raises:
             DatabaseError: If an error occurs while saving to the database.

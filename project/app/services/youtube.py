@@ -1,9 +1,9 @@
+import logging
 from pytube import YouTube
-from pydub import AudioSegment
 from pytube.exceptions import PytubeError
+from pydub import AudioSegment
 from typing import Dict
 from io import BytesIO
-import logging
 from app.exceptions import DownloadError, YoutubeAudioNotFound, DataTransformationError
 
 logger = logging.getLogger(__name__)
