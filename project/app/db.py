@@ -2,9 +2,12 @@ from sqlmodel import SQLModel, create_engine
 from sqlmodel.ext.asyncio.session import AsyncSession, AsyncEngine
 from sqlalchemy.orm import sessionmaker
 from .settings import settings
+import redis
 
 
 engine = AsyncEngine(create_engine(settings.DATABASE_URL, echo=True, future=True))
+
+redis_connection = redis.Redis.from_url(settings.REDIS_URL)
 
 
 async def init_db():

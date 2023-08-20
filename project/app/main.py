@@ -1,10 +1,13 @@
+import ast
 import logging
 from pytube import YouTube
 from pytube.exceptions import PytubeError
 from pydantic import BaseModel
 from fastapi import Depends, FastAPI, BackgroundTasks, HTTPException
+from fastapi.encoders import jsonable_encoder
 from sqlmodel.ext.asyncio.session import AsyncSession
 from app.db import get_session
+from app.db import redis_connection
 from app.models import YoutubeMetadata, ShazamMetadata
 from app.services.youtube import YoutubeMetadataTransformer
 from app.services.service import handle_download_and_recognize
@@ -40,6 +43,9 @@ async def youtube_url(
     Returns:
         YoutubeResponse: The extracted YoutubeMetadata.
     """
+    cache = redis_connection.get(youtube_url)
+    if cache:
+        return ast.literal_eval(cache.decode("utf-8"))
     try:
         youtube_object = YouTube(youtube_url)
     except PytubeError as e:
@@ -79,4 +85,7 @@ async def youtube_url(
             session,
         )
 
+    redis_json_data = jsonable_encoder(youtube_metadata)
+    redis_connection.set(youtube_url, str(redis_json_data))
+    redis_connection.expire(youtube_url, settings.REDIS_TTL)
     return youtube_metadata

@@ -11,7 +11,7 @@ services:
       - 8004:8000
     environment:
       - DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/foo
-      - DOWNLOAD_PATH=app/downloads
+      - REDIS_URL=redis://redis
     depends_on:
       - db
     networks:
@@ -27,6 +27,11 @@ services:
       - POSTGRES_DB=foo
     volumes:
       - postgresql_data:/data
+    networks:
+      - app_net
+
+  redis:
+    image: redis:7-alpine
     networks:
       - app_net
 
