@@ -28,10 +28,9 @@ The expected response:
 Upon query submission, relevant YouTube metadata will be provided for the specific video. Simultaneously, it will start a background task for downloading and recognizing the audio using shazamio. If recognized sucessful it will also save the retrived Shazam metadata.
 
 ## How it works
+The following is a typical flow for the youtube-download-service:
 
 ![alt text](https://github.com/panagiotisfe/youtube-download-serivce/blob/master/img/app_flow.png?raw=true)
-
-The following is a typical flow for the youtube-download-service:
 
 - User sumbits the youtube url by querying the url endpoint.
 - Service is fetching related YouTube data using pytube library.
