@@ -43,9 +43,12 @@ async def youtube_url(
     Returns:
         YoutubeResponse: The extracted YoutubeMetadata.
     """
-    cache = redis_connection.get(youtube_url)
-    if cache:
-        return ast.literal_eval(cache.decode("utf-8"))
+    try:
+        cache = redis_connection.get(youtube_url)
+        if cache:
+            return ast.literal_eval(cache.decode("utf-8"))
+    except Exception as e:
+        logger.error("An error occurred while fetching redis cache: " + str(e))
     try:
         youtube_object = YouTube(youtube_url)
     except PytubeError as e:
@@ -84,8 +87,10 @@ async def youtube_url(
             youtube_metadata,
             session,
         )
-
-    redis_json_data = jsonable_encoder(youtube_metadata)
-    redis_connection.set(youtube_url, str(redis_json_data))
-    redis_connection.expire(youtube_url, settings.REDIS_TTL)
+    try:
+        redis_json_data = jsonable_encoder(youtube_metadata)
+        redis_connection.set(youtube_url, str(redis_json_data))
+        redis_connection.expire(youtube_url, settings.REDIS_TTL)
+    except Exception as e:
+        logger.error("An error occurred while setting redis cache: " + str(e))
     return youtube_metadata
