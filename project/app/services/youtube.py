@@ -38,12 +38,14 @@ class YoutubeAudioDownloader:
             YoutubeAudioNotFound: If no suitable audio stream is found.
         """
         try:
-            stream = self.youtube_object.streams.get_audio_only()
-            if not stream:
+            if stream := self.youtube_object.streams.get_audio_only():
+                stream.stream_to_buffer(self.buffer)
+            else:
                 raise YoutubeAudioNotFound
-            stream.stream_to_buffer(self.buffer)
         except PytubeError as e:
-            raise DownloadError(f"An error occurred during audio download. {str(e)}")
+            raise DownloadError(
+                f"An error occurred during audio download. {str(e)}"
+            ) from e
 
     def convert_to_audio_segment(self) -> AudioSegment:
         """
@@ -101,4 +103,4 @@ class YoutubeMetadataTransformer:
         except Exception as e:
             raise DataTransformationError(
                 f"An error occurred during data transformation. {str(e)}"
-            )
+            ) from e

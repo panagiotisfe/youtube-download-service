@@ -36,7 +36,7 @@ class ShazamAudioRecognizer:
         except Exception as e:
             raise RecognizeError(
                 f"An error occurred during audio recognition. {str(e)}"
-            )
+            ) from e
 
 
 class ShazamMetadataTransformer:
@@ -87,8 +87,8 @@ class ShazamMetadataTransformer:
         except KeyError as ke:
             raise DataTransformationError(
                 f"KeyError occurred during data transformation. {str(ke)}"
-            )
+            ) from ke
         except Exception as e:
             raise DataTransformationError(
                 f"An error occurred during data transformation. {str(e)}"
-            )
+            ) from e

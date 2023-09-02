@@ -77,8 +77,7 @@ async def recognize_audio(audio_segment: AudioSegment) -> Optional[Dict]:
         Shazam recognition response as a dictionary or None if unsuccessful.
     """
     shazam_audio = ShazamAudioRecognizer(audio_segment)
-    shazam_response = await shazam_audio.recognize_audio()
-    return shazam_response
+    return await shazam_audio.recognize_audio()
 
 
 async def save_shazam_metadata(

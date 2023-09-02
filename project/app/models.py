@@ -37,7 +37,7 @@ class YoutubeMetadata(SQLModel, table=True):
         except DBAPIError as e:
             raise DatabaseError(
                 f"An error occurred while saving to the database: {str(e)}"
-            )
+            ) from e
 
 
 class ShazamMetadata(SQLModel, table=True):
@@ -75,4 +75,4 @@ class ShazamMetadata(SQLModel, table=True):
         except DBAPIError as e:
             raise DatabaseError(
                 f"An error occurred while saving to the database: {str(e)}"
-            )
+            ) from e

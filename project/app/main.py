@@ -44,16 +44,17 @@ async def youtube_url(
         YoutubeResponse: The extracted YoutubeMetadata.
     """
     try:
-        cache = redis_connection.get(youtube_url)
-        if cache:
+        if cache := redis_connection.get(youtube_url):
             return ast.literal_eval(cache.decode("utf-8"))
     except Exception as e:
-        logger.error("An error occurred while fetching redis cache: " + str(e))
+        logger.error(f"An error occurred while fetching redis cache: {str(e)}")
     try:
         youtube_object = YouTube(youtube_url)
     except PytubeError as e:
-        logger.error("An error occurred while processing the YouTube URL: " + str(e))
-        raise HTTPException(status_code=404, detail="Error processing the YouTube URL")
+        logger.error(f"An error occurred while processing the YouTube URL: {str(e)}")
+        raise HTTPException(
+            status_code=404, detail="Error processing the YouTube URL"
+        ) from e
 
     if youtube_object.length > settings.MAX_VIDEO_LENGTH:
         raise HTTPException(
@@ -66,7 +67,9 @@ async def youtube_url(
         shazam_metadata = await session.get(ShazamMetadata, youtube_object.video_id)
     except DatabaseError as e:
         logger.error(e)
-        raise HTTPException(status_code=500, detail="An unexpected error occurred")
+        raise HTTPException(
+            status_code=500, detail="An unexpected error occurred"
+        ) from e
 
     if not youtube_metadata:
         # If YouTube metadata doesn't exist, transform and save it to the database
@@ -78,7 +81,9 @@ async def youtube_url(
             await youtube_metadata.save(session)
         except DatabaseError as e:
             logger.error(e)
-            raise HTTPException(status_code=500, detail="An unexpected error occurred")
+            raise HTTPException(
+                status_code=500, detail="An unexpected error occurred"
+            ) from e
 
     if not shazam_metadata:
         background_tasks.add_task(
@@ -92,5 +97,5 @@ async def youtube_url(
         redis_connection.set(youtube_url, str(redis_json_data))
         redis_connection.expire(youtube_url, settings.REDIS_TTL)
     except Exception as e:
-        logger.error("An error occurred while setting redis cache: " + str(e))
+        logger.error(f"An error occurred while setting redis cache: {str(e)}")
     return youtube_metadata
